@@ -174,7 +174,10 @@ def stats_pais(df, pais):
     df_pais = df[
         (df["home_team"].str.lower() == pais) |
         (df["away_team"].str.lower() == pais)
-    ]
+    ].copy()
+
+    if df_pais.empty:
+        return 0, 0, 0, 0, 0, 0, 0
 
     total = len(df_pais)
 
@@ -190,16 +193,17 @@ def stats_pais(df, pais):
 
     empates = len(df_pais[df_pais["result"] == "D"])
 
-    gols_marcados = float(df_pais.apply(
-        lambda r: r["home_team_goals"] if r["home_team"].lower() == pais else r["away_team_goals"],
-        axis=1
-    ).sum())
+    # garante números limpos
+    df_pais["home_team_goals"] = pd.to_numeric(df_pais["home_team_goals"], errors="coerce")
+    df_pais["away_team_goals"] = pd.to_numeric(df_pais["away_team_goals"], errors="coerce")
 
-    gols_sofridos = float(df_pais.apply(
-        lambda r: r["away_team_goals"] if r["home_team"].lower() == pais else r["home_team_goals"],
-        axis=1
-    ).sum())
+    home = df_pais["home_team"].str.lower() == pais
 
+    gols_marcados = df_pais["home_team_goals"].where(home, df_pais["away_team_goals"]).sum()
+    gols_sofridos = df_pais["away_team_goals"].where(home, df_pais["home_team_goals"]).sum()
+
+    gols_marcados = float(gols_marcados)
+    gols_sofridos = float(gols_sofridos)
     saldo = float(gols_marcados - gols_sofridos)
 
     return total, vitorias, derrotas, empates, gols_marcados, gols_sofridos, saldo
