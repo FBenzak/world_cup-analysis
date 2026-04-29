@@ -268,6 +268,13 @@ if menu == "Análise":
 
         st.metric("Títulos", titulos_copa.get(pais.title(), 0))
 
+if prob1 > prob2:
+    st.success(f"Favorito: {p1.title()}")
+elif prob2 > prob1:
+    st.success(f"Favorito: {p2.title()}")
+else:
+    st.info("Equilíbrio entre seleções")
+
 # Comparação
 elif menu == "Comparação":
 
