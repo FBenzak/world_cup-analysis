@@ -281,6 +281,7 @@ elif menu == "Comparação":
             p1 = normalizar_input(p1)
             p2 = normalizar_input(p2)
 
+            # SCORE
             s1 = calcular_score(df_all, p1)
             s2 = calcular_score(df_all, p2)
 
@@ -289,34 +290,45 @@ elif menu == "Comparação":
             prob1 = (s1 / total) * 100 if total else 50
             prob2 = (s2 / total) * 100 if total else 50
 
+            # STATS
             stats1 = stats_pais(df_all, p1)
             stats2 = stats_pais(df_all, p2)
 
+            t1, v1, d1, e1, gm1, gs1, sg1 = stats1
+            t2, v2, d2, e2, gm2, gs2, sg2 = stats2
+
+            # RESULTADO
             st.subheader("Probabilidades")
 
             col1, col2 = st.columns(2)
+
             col1.metric(p1.title(), f"{prob1:.1f}%")
             col2.metric(p2.title(), f"{prob2:.1f}%")
 
+            st.markdown("---")
             st.markdown("### Estatísticas completas")
 
             c1, c2 = st.columns(2)
 
             with c1:
                 st.markdown(f"## {p1.title()}")
-                st.write(stats1)
+                st.metric("Jogos", t1)
+                st.metric("Vitórias", v1)
+                st.metric("Empates", e1)
+                st.metric("Derrotas", d1)
+                st.metric("Gols Marcados", gm1)
+                st.metric("Gols Sofridos", gs1)
+                st.metric("Saldo de Gols", sg1)
 
             with c2:
                 st.markdown(f"## {p2.title()}")
-                st.write(stats2)
-
-            if prob1 > prob2:
-                st.success(f"Favorito: {p1.title()}")
-            elif prob2 > prob1:
-                st.success(f"Favorito: {p2.title()}")
-            else:
-                st.info("Equilíbrio total")
-
+                st.metric("Jogos", t2)
+                st.metric("Vitórias", v2)
+                st.metric("Empates", e2)
+                st.metric("Derrotas", d2)
+                st.metric("Gols Marcados", gm2)
+                st.metric("Gols Sofridos", gs2)
+                st.metric("Saldo de Gols", sg2)
 # SOBRE
 else:
 
