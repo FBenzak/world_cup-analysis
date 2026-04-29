@@ -211,7 +211,7 @@ section[data-testid="stSidebar"] {
     background-color: #e8f5e9;
 }
 
-/* TEXTO MENU PRETO */
+/* Texto menu */
 section[data-testid="stSidebar"] * {
     color: black !important;
 }
@@ -268,44 +268,38 @@ if menu == "Análise":
 
         st.metric("Títulos", titulos_copa.get(pais.title(), 0))
 
-if prob1 > prob2:
-    st.success(f"Favorito: {p1.title()}")
-elif prob2 > prob1:
-    st.success(f"Favorito: {p2.title()}")
-else:
-    st.info("Equilíbrio entre seleções")
-
 # Comparação
 elif menu == "Comparação":
 
-    p1 = st.text_input("Seleção 1", key="p1")
-    p2 = st.text_input("Seleção 2", key="p2")
+    st.subheader("Comparação entre Seleções")
+
+    # Inputs (com keys para evitar conflito)
+    p1 = st.text_input("Seleção 1", key="comp_p1")
+    p2 = st.text_input("Seleção 2", key="comp_p2")
 
     if st.button("Comparar"):
 
         if p1 and p2:
 
+            # Normalização
             p1 = normalizar_input(p1)
             p2 = normalizar_input(p2)
 
-            # SCORE
+            # Score
             s1 = calcular_score(df_all, p1)
             s2 = calcular_score(df_all, p2)
 
-            total = float(s1 + s2)
+            total = s1 + s2
 
-            prob1 = (s1 / total) * 100 if total else 50
-            prob2 = (s2 / total) * 100 if total else 50
+            prob1 = (s1 / total) * 100 if total > 0 else 50
+            prob2 = (s2 / total) * 100 if total > 0 else 50
 
-            # STATS
-            stats1 = stats_pais(df_all, p1)
-            stats2 = stats_pais(df_all, p2)
+            # ESTATÍSTICAS
+            t1, v1, d1, e1, gm1, gs1, sg1 = stats_pais(df_all, p1)
+            t2, v2, d2, e2, gm2, gs2, sg2 = stats_pais(df_all, p2)
 
-            t1, v1, d1, e1, gm1, gs1, sg1 = stats1
-            t2, v2, d2, e2, gm2, gs2, sg2 = stats2
-
-            # RESULTADO
-            st.subheader("Probabilidades")
+            # Probabilidades
+            st.markdown("Probabilidades")
 
             col1, col2 = st.columns(2)
 
@@ -313,12 +307,15 @@ elif menu == "Comparação":
             col2.metric(p2.title(), f"{prob2:.1f}%")
 
             st.markdown("---")
-            st.markdown("### Estatísticas completas")
+
+            # Estatísticas Completas
+            st.markdown("📈 Estatísticas completas")
 
             c1, c2 = st.columns(2)
 
             with c1:
-                st.markdown(f"## {p1.title()}")
+                st.markdown(f"### {p1.title()}")
+
                 st.metric("Jogos", t1)
                 st.metric("Vitórias", v1)
                 st.metric("Empates", e1)
@@ -326,9 +323,11 @@ elif menu == "Comparação":
                 st.metric("Gols Marcados", gm1)
                 st.metric("Gols Sofridos", gs1)
                 st.metric("Saldo de Gols", sg1)
+                st.metric("Títulos", titulos_copa.get(p1.title(), 0))
 
             with c2:
-                st.markdown(f"## {p2.title()}")
+                st.markdown(f"### {p2.title()}")
+
                 st.metric("Jogos", t2)
                 st.metric("Vitórias", v2)
                 st.metric("Empates", e2)
@@ -336,6 +335,59 @@ elif menu == "Comparação":
                 st.metric("Gols Marcados", gm2)
                 st.metric("Gols Sofridos", gs2)
                 st.metric("Saldo de Gols", sg2)
+                st.metric("Títulos", titulos_copa.get(p2.title(), 0))
+
+            st.markdown("---")
+
+            # Favorito
+            if prob1 > prob2:
+
+                st.markdown(f"""
+                <div style="
+                    background-color: #1b5e20;
+                    color: white;
+                    padding: 18px;
+                    border-radius: 12px;
+                    text-align: center;
+                    font-size: 22px;
+                    font-weight: bold;
+                ">
+                Favorito: {p1.title()}
+                </div>
+                """, unsafe_allow_html=True)
+
+            elif prob2 > prob1:
+
+                st.markdown(f"""
+                <div style="
+                    background-color: #1b5e20;
+                    color: white;
+                    padding: 18px;
+                    border-radius: 12px;
+                    text-align: center;
+                    font-size: 22px;
+                    font-weight: bold;
+                ">
+                Favorito: {p2.title()}
+                </div>
+                """, unsafe_allow_html=True)
+
+            else:
+
+                st.markdown("""
+                <div style="
+                    background-color: #424242;
+                    color: white;
+                    padding: 18px;
+                    border-radius: 12px;
+                    text-align: center;
+                    font-size: 20px;
+                    font-weight: bold;
+                ">
+                Equilíbrio total entre as seleções
+                </div>
+                """, unsafe_allow_html=True)
+          
 # SOBRE
 else:
 
