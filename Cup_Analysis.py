@@ -75,6 +75,8 @@ def padronizar_paises(df):
 
     return df
 
+df_all = padronizar_paises(df_all)
+
 # Resultados: H = vitória casa, A = vitória visitante, D = empate
 def padronizar_resultados(df):
     df = df.copy()
@@ -94,19 +96,17 @@ def padronizar_resultados(df):
 
     return df
 
-df_all = padronizar_paises(df_all)
 df_all = padronizar_resultados(df_all)
 
 # Dados Auxliares (para normalização de países e títulos)
 mapa_paises = {
     "brasil": "Brazil",
-    "argentina": "Argentina",
     "alemanha": "Germany",
     "franca": "France",
     "inglaterra": "England",
     "espanha": "Spain",
     "italia": "Italy",
-    "portugal": "Portugal",
+    "argentina": "Argentina",
     "eua": "United States",
     "usa": "United States"
 }
@@ -130,7 +130,10 @@ def normalizar_input(pais):
 # SCORE
 def calcular_score(df, pais):
     pais = pais.lower()
-    df_pais = df[(df["home_team"].str.lower() == pais) | (df["away_team"].str.lower() == pais)]
+    df_pais = df[
+        (df["home_team"].str.lower() == pais) |
+        (df["away_team"].str.lower() == pais)
+    ]
 
     if df_pais.empty:
         return 0
@@ -138,13 +141,16 @@ def calcular_score(df, pais):
     score = 0
 
     for _, row in df_pais.iterrows():
+
         ano = row["year"]
         peso = 1 / (2026 - ano)
 
         if row["home_team"].lower() == pais:
-            gp, gc = row["home_team_goals"], row["away_team_goals"]
+            gp = row["home_team_goals"]
+            gc = row["away_team_goals"]
         else:
-            gp, gc = row["away_team_goals"], row["home_team_goals"]
+            gp = row["away_team_goals"]
+            gc = row["home_team_goals"]
 
         saldo = gp - gc
 
@@ -164,7 +170,11 @@ def calcular_score(df, pais):
 
 # Estatísticas detalhadas por país
 def stats_pais(df, pais):
-    df_pais = df[(df["home_team"].str.lower() == pais) | (df["away_team"].str.lower() == pais)]
+
+    df_pais = df[
+        (df["home_team"].str.lower() == pais) |
+        (df["away_team"].str.lower() == pais)
+    ]
 
     total = len(df_pais)
 
@@ -180,17 +190,17 @@ def stats_pais(df, pais):
 
     empates = len(df_pais[df_pais["result"] == "D"])
 
-gols_marcados = float(df_pais.apply(
-    lambda r: r["home_team_goals"] if r["home_team"].lower() == pais else r["away_team_goals"],
-    axis=1
-).sum())
+    gols_marcados = float(df_pais.apply(
+        lambda r: r["home_team_goals"] if r["home_team"].lower() == pais else r["away_team_goals"],
+        axis=1
+    ).sum())
 
-gols_sofridos = float(df_pais.apply(
-    lambda r: r["away_team_goals"] if r["home_team"].lower() == pais else r["home_team_goals"],
-    axis=1
-).sum())
+    gols_sofridos = float(df_pais.apply(
+        lambda r: r["away_team_goals"] if r["home_team"].lower() == pais else r["home_team_goals"],
+        axis=1
+    ).sum())
 
-saldo = float(gols_marcados - gols_sofridos)
+    saldo = float(gols_marcados - gols_sofridos)
 
     return total, vitorias, derrotas, empates, gols_marcados, gols_sofridos, saldo
 
@@ -239,7 +249,6 @@ st.title("⚽ Copa do Mundo Dashboard")
 
 menu = st.sidebar.radio("Menu", ["Análise", "Comparação", "Sobre"])
 
-
 # Análise
 if menu == "Análise":
 
@@ -249,144 +258,59 @@ if menu == "Análise":
 
         pais = normalizar_input(pais_input)
 
-        total, v, d, e, gm, gs, sg = stats_pais(df_all, pais)
+        t, v, d, e, gm, gs, sg = stats_pais(df_all, pais)
 
         st.subheader(pais.title())
 
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Jogos", total)
-        col2.metric("Vitórias", v)
-        col3.metric("Empates", e)
-        col4.metric("Derrotas", d)
+        st.metric("Jogos", t)
+        st.metric("Vitórias", v)
+        st.metric("Empates", e)
+        st.metric("Derrotas", d)
 
-        st.markdown("### Estatísticas avançadas")
-
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Gols Marcados", gm)
-        c2.metric("Gols Sofridos", gs)
-        c3.metric("Saldo", sg)
+        st.metric("Gols Marcados", gm)
+        st.metric("Gols Sofridos", gs)
+        st.metric("Saldo", sg)
 
         st.metric("Títulos", titulos_copa.get(pais.title(), 0))
 
 # Comparação
 elif menu == "Comparação":
 
-    st.subheader("Comparação entre Seleções")
-
-    # Inputs (com keys para evitar conflito)
-    p1 = st.text_input("Seleção 1", key="comp_p1")
-    p2 = st.text_input("Seleção 2", key="comp_p2")
+    p1 = st.text_input("Seleção 1", key="p1")
+    p2 = st.text_input("Seleção 2", key="p2")
 
     if st.button("Comparar"):
 
         if p1 and p2:
 
-            # Normalização
             p1 = normalizar_input(p1)
             p2 = normalizar_input(p2)
 
-            # Score
             s1 = calcular_score(df_all, p1)
             s2 = calcular_score(df_all, p2)
 
             total = s1 + s2
 
-            prob1 = (s1 / total) * 100 if total > 0 else 50
-            prob2 = (s2 / total) * 100 if total > 0 else 50
+            prob1 = (s1 / total) * 100 if total else 50
+            prob2 = (s2 / total) * 100 if total else 50
 
-            # ESTATÍSTICAS
             t1, v1, d1, e1, gm1, gs1, sg1 = stats_pais(df_all, p1)
             t2, v2, d2, e2, gm2, gs2, sg2 = stats_pais(df_all, p2)
 
-            # Probabilidades
-            st.markdown("Probabilidades")
+            st.subheader("Probabilidades")
 
             col1, col2 = st.columns(2)
-
             col1.metric(p1.title(), f"{prob1:.1f}%")
             col2.metric(p2.title(), f"{prob2:.1f}%")
 
             st.markdown("---")
 
-            # Estatísticas Completas
-            st.markdown("📈 Estatísticas completas")
-
-            c1, c2 = st.columns(2)
-
-            with c1:
-                st.markdown(f"### {p1.title()}")
-
-                st.metric("Jogos", t1)
-                st.metric("Vitórias", v1)
-                st.metric("Empates", e1)
-                st.metric("Derrotas", d1)
-                st.metric("Gols Marcados", gm1)
-                st.metric("Gols Sofridos", gs1)
-                st.metric("Saldo de Gols", sg1)
-                st.metric("Títulos", titulos_copa.get(p1.title(), 0))
-
-            with c2:
-                st.markdown(f"### {p2.title()}")
-
-                st.metric("Jogos", t2)
-                st.metric("Vitórias", v2)
-                st.metric("Empates", e2)
-                st.metric("Derrotas", d2)
-                st.metric("Gols Marcados", gm2)
-                st.metric("Gols Sofridos", gs2)
-                st.metric("Saldo de Gols", sg2)
-                st.metric("Títulos", titulos_copa.get(p2.title(), 0))
-
-            st.markdown("---")
-
-            # Favorito
             if prob1 > prob2:
-
-                st.markdown(f"""
-                <div style="
-                    background-color: #1b5e20;
-                    color: white;
-                    padding: 18px;
-                    border-radius: 12px;
-                    text-align: center;
-                    font-size: 22px;
-                    font-weight: bold;
-                ">
-                Favorito: {p1.title()}
-                </div>
-                """, unsafe_allow_html=True)
-
+                st.success(f"Favorito: {p1.title()}")
             elif prob2 > prob1:
-
-                st.markdown(f"""
-                <div style="
-                    background-color: #1b5e20;
-                    color: white;
-                    padding: 18px;
-                    border-radius: 12px;
-                    text-align: center;
-                    font-size: 22px;
-                    font-weight: bold;
-                ">
-                Favorito: {p2.title()}
-                </div>
-                """, unsafe_allow_html=True)
-
+                st.success(f" Favorito: {p2.title()}")
             else:
-
-                st.markdown("""
-                <div style="
-                    background-color: #424242;
-                    color: white;
-                    padding: 18px;
-                    border-radius: 12px;
-                    text-align: center;
-                    font-size: 20px;
-                    font-weight: bold;
-                ">
-                Equilíbrio total entre as seleções
-                </div>
-                """, unsafe_allow_html=True)
+                st.info("Equilíbrio")
           
 # SOBRE
 else:
