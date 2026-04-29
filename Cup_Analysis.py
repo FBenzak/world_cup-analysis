@@ -180,17 +180,17 @@ def stats_pais(df, pais):
 
     empates = len(df_pais[df_pais["result"] == "D"])
 
-    gols_marcados = df_pais.apply(
-        lambda r: r["home_team_goals"] if r["home_team"].lower() == pais else r["away_team_goals"],
-        axis=1
-    ).sum()
+gols_marcados = float(df_pais.apply(
+    lambda r: r["home_team_goals"] if r["home_team"].lower() == pais else r["away_team_goals"],
+    axis=1
+).sum())
 
-    gols_sofridos = df_pais.apply(
-        lambda r: r["away_team_goals"] if r["home_team"].lower() == pais else r["home_team_goals"],
-        axis=1
-    ).sum()
+gols_sofridos = float(df_pais.apply(
+    lambda r: r["away_team_goals"] if r["home_team"].lower() == pais else r["home_team_goals"],
+    axis=1
+).sum())
 
-    saldo = gols_marcados - gols_sofridos
+saldo = float(gols_marcados - gols_sofridos)
 
     return total, vitorias, derrotas, empates, gols_marcados, gols_sofridos, saldo
 
