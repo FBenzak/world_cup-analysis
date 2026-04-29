@@ -271,8 +271,8 @@ if menu == "Análise":
 # Comparação
 elif menu == "Comparação":
 
-    p1 = st.text_input("Seleção 1", key="comp_p1")
-    p2 = st.text_input("Seleção 2", key="comp_p2")
+    p1 = st.text_input("Seleção 1", key="p1")
+    p2 = st.text_input("Seleção 2", key="p2")
 
     if st.button("Comparar"):
 
@@ -281,66 +281,41 @@ elif menu == "Comparação":
             p1 = normalizar_input(p1)
             p2 = normalizar_input(p2)
 
-            # SCORE
             s1 = calcular_score(df_all, p1)
             s2 = calcular_score(df_all, p2)
 
-            total_score = s1 + s2
+            total = float(s1 + s2)
 
-            prob1 = (s1 / total_score) * 100 if total_score else 50
-            prob2 = (s2 / total_score) * 100 if total_score else 50
+            prob1 = (s1 / total) * 100 if total else 50
+            prob2 = (s2 / total) * 100 if total else 50
 
-            # Estatísticas detalhadas
             stats1 = stats_pais(df_all, p1)
             stats2 = stats_pais(df_all, p2)
 
-            (t1, v1, d1, e1, gm1, gs1, sg1) = stats1
-            (t2, v2, d2, e2, gm2, gs2, sg2) = stats2
-
-            # Header probabilidades
             st.subheader("Probabilidades")
 
             col1, col2 = st.columns(2)
-
             col1.metric(p1.title(), f"{prob1:.1f}%")
             col2.metric(p2.title(), f"{prob2:.1f}%")
 
-            # Estatisticas lado a lado
-            st.markdown("### 📊 Estatísticas completas")
+            st.markdown("### Estatísticas completas")
 
             c1, c2 = st.columns(2)
 
             with c1:
                 st.markdown(f"## {p1.title()}")
-
-                st.metric("Partidas", t1)
-                st.metric("Vitórias", v1)
-                st.metric("Empates", e1)
-                st.metric("Derrotas", d1)
-                st.metric("Gols Marcados", gm1)
-                st.metric("Gols Sofridos", gs1)
-                st.metric("Saldo de Gols", sg1)
+                st.write(stats1)
 
             with c2:
                 st.markdown(f"## {p2.title()}")
-
-                st.metric("Partidas", t2)
-                st.metric("Vitórias", v2)
-                st.metric("Empates", e2)
-                st.metric("Derrotas", d2)
-                st.metric("Gols Marcados", gm2)
-                st.metric("Gols Sofridos", gs2)
-                st.metric("Saldo de Gols", sg2)
-
-            # Favorito
-            st.markdown("---")
+                st.write(stats2)
 
             if prob1 > prob2:
                 st.success(f"Favorito: {p1.title()}")
             elif prob2 > prob1:
                 st.success(f"Favorito: {p2.title()}")
             else:
-                st.info("Equilíbrio total entre as seleções")
+                st.info("Equilíbrio total")
 
 # SOBRE
 else:
